@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>OpenVV Demo</title>
+  <script type="text/javascript" src="../dist/openvv.js"></script>  
+</head>
+<body>
+  <div id="elementToMeasure" style="width: 16px; height: 16px; position: absolute; top: 2000px; background-color: orange;"></div>
+  <script type="text/javascript">
+    var element = document.getElementById('elementToMeasure');
+
+    var openvv = new OpenVV({
+      autostart:true,
+      criteria: OpennVV.ViewabilityCriteria.MRC_VIDEO
+    });
+
+    openvv
+      .measureElement(element)
+      .onViewableStart(function() {
+        console.log('Viewable Start',new Date().getTime())
+      })
+      .onViewableComplete(function() {
+        console.log('Viewable Complete',new Date().getTime())
+      })
+      .onUnMeasureable(function() {
+        console.log('Unmeasureable')
+      });
+
+  </script>
+</body>
+</html>

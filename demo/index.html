@@ -12,7 +12,7 @@
 
     var openvv = new OpenVV({
       autostart:true,
-      criteria: OpennVV.ViewabilityCriteria.MRC_VIDEO
+      criteria: OpenVV.ViewabilityCriteria.MRC_VIDEO
     });
 
     openvv
@@ -24,7 +24,7 @@
         console.log('Viewable Complete',new Date().getTime())
       })
       .onUnMeasureable(function() {
-        console.log('Unmeasureable')
+        console.log('Unmeasureable');
       });
 
   </script>

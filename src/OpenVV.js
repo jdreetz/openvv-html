@@ -1,42 +1,31 @@
 import * as ViewabilityCriteria from './Options/ViewabilityCriteria';
-import MeasurementController from 'Measurement/MeasurementController';
+// import MeasurementController from 'Measurement/MeasurementController';
+import MeasurementExecutor from './Measurement/MeasurementExecutor';
+import { defaultStrategy } from './Measurement/Strategies/';
 // import MeasureableElement from './Measurement/MeasureableElement';
 // import MeasurementMonitor from './'
 
 // Main entry point
 export default class OpenVV {
-  constructor(config) {
-    this.config = config;
-    this.controller = config.controller || new MeasurementController(config);
+  constructor(userDefaults) {
+    // if(config !== undefined) {
+    //   this.config = config;
+    //   this.initController(config);
+    // }
+    this.executors = [];
+    // this.globalStrategy = Object.assign(defaultStrategy(),userDefaults);
   }
 
   configure(config) {
     this.config = config;
-  }
-
-  setController(controller) {
-    this.controller = controller;
+    // initController(config);
   }
 
   measureElement(element, strategy) {
-    return this.controller.addMeasureable(element,strategy);
-  }
-
-  beginMeasurement() {
-
-  }
-
-  pauseMeasurement() {
-
-  }
-
-  resumeMeasurement() {
-
-  }
-
-  endMeasurement() {
-
-  }
+    const executor = new MeasurementExecutor(element,strategy);
+    this.executors.push(executor);
+    return executor;
+  } 
 }
 
 // Expose support classes / constants

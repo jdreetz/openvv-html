@@ -1,16 +1,26 @@
 export default class InViewTimer {
   constructor(duration) {
-    this.duration = duration;
-    this.timer = setTimeout(this.timerComplete.bind(this),duration);  
+    this.duration = duration;      
     this.listeners = [];
+    this.completed = false;
   }
 
   timerComplete() {
-    this.listeners.forEach( listener => listener() );
+    this.completed = true;
+    this.listeners.forEach( l => l() );
   }
 
   elapsed(cb) {
-    this.listeners.push(cb);
+    if(typeof cb === 'function') {
+      this.listeners.push(cb);
+    }
+  }
+
+  start() {
+    if(this.timer) {
+      clearTimeout(this.timer);
+    }
+    this.timer = setTimeout(this.timerComplete.bind(this),this.duration);
   }
 
   pause() {

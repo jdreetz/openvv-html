@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     browserify:{
-      dist:{
+      production:{
         files:{
           'dist/openvv.js':['src/OpenVV.js']
         },
@@ -17,6 +17,7 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.registerTask('default',['browserify:dist']);
+  grunt.registerTask('default',['browserify:production']);
+  grunt.registerTask('development',['browserify:development']);
   grunt.registerTask('test',[]);
 }

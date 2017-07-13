@@ -7,13 +7,18 @@ import * as Rules from './Strategies/rules';
 // tracking how long an element is viewable for,
 // and notifying listeners of changes
 export default class MeasurementExecutor {
-  constructor(element, strategy = defaultStrategy()) {
+  constructor(element, strategy) {
     this.timers = {};
     this.listeners = { start: [], complete: [], unmeasureable: [] };
+    this.completedCount = 0;
     this.element = element;
-    this.strategy = strategy;
-    this.measureables = strategy.measureables.map(this.instantiateMeasureable.bind(this));
-    if(this.unMeasureable()) {
+    this.strategy = Object.assign({}, defaultStrategy, strategy); // ensure all strategy properties are included
+    this.measureables = strategy
+                          .measureables
+                          .map(this.instantiateMeasureable.bind(this))
+                          .filter(this.strategy.technique_preference);
+
+    if(this.unmeasureable) {
       // fire unmeasureable after current JS loop completes 
       // so opportunity is given for consumers to provide unmeasureable callback
       setTimeout( () => this.listeners.unmeasureable.forEach( m => m() ), 0);
@@ -58,7 +63,9 @@ export default class MeasurementExecutor {
   }
 
   timerElapsed(measureable) {
-    if(this.strategy.rule === Rules.ANY || (this.strategy.rule === Rules.ALL && this.allCompleted())) {
+    this.completedCount++;
+
+    if(this.measureables.length === this.completedCount) {
       this.listeners.complete.forEach( l => l(measureable) );
     }
   }
@@ -71,24 +78,9 @@ export default class MeasurementExecutor {
     return this;
   }
 
-  allCompleted() {
-    return this.completedTimers() === this.measureables.length;
-  }
-
-  completedTimers() {
-    return this.timers.reduce( (count,timer) => timer.completed ? count + 1 : count, 0);
-  }
-
-  unMeasureableCount() {
-    return this.measureables.reduce( (count,m) => m.unmeasureable ? count + 1 : count, 0);
-  }
-
-  unMeasureable() {
-    if(this.strategy.rule === Rules.ANY && this.unMeasureableCount() > 0) {
-      return true;
-    }
-    else if(this.strategy.rule === Rules.ALL && this.unMeasureableCount() === this.measureables.length) {
-      return true;
+  get unmeasureable() {
+    if(typeof this.strategy.unmeasureable_rule === 'function') {
+      return this.strategy.unmeasureable_rule(this.measureables);
     }
 
     return false;
@@ -107,7 +99,7 @@ export default class MeasurementExecutor {
     return this.addCallback(callback,'complete');
   }
 
-  onUnMeasureable(callback) {
+  onUnmeasureable(callback) {
     return this.addCallback(callback,'unmeasureable');
   }
 }

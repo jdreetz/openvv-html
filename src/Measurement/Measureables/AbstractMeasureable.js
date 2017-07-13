@@ -26,7 +26,11 @@ export default class AbstractMeasureable {
     return this;
   }
 
-  canMeasure() {
+  get unmeasureable() {
+    return false;
+  }
+
+  get viewable() {
     return false;
   }
 

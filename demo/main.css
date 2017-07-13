@@ -1,0 +1,18 @@
+#statusContainer {
+  position: fixed;
+  width: 128px;
+  height: 96px;
+  background: gray;
+}
+
+#statusContainer[data-viewable="true"] {
+  background: green;
+}
+
+#elementToMeasure {
+  width: 640px; 
+  height: 360px; 
+  position: absolute; 
+  top: 2000px;
+  bottom: 2000px;
+}

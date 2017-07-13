@@ -4,11 +4,22 @@
   <meta charset="utf-8">
   <title>OpenVV Demo</title>
   <script type="text/javascript" src="../dist/openvv.js"></script>  
+  <link rel="stylesheet" type="text/css" href="main.css">
 </head>
 <body>
-  <div id="elementToMeasure" style="width: 16px; height: 16px; position: absolute; top: 2000px; background-color: orange;"></div>
+  <div id="statusContainer">
+    <ul>
+      <li>In View: <span id="inviewStatus">Not In View</span></li>
+      <li>Viewable: <span id="viewableStatus">Not Viewable</span></li>
+    </ul>
+  </div>
+  <video id="elementToMeasure" src="sample.mp4" controls></video>
+
   <script type="text/javascript">
-    var element = document.getElementById('elementToMeasure');
+    var element = document.getElementById('elementToMeasure'), 
+        inviewEl = document.getElementById('inviewStatus'),
+        statusEl = document.getElementById('statusContainer'),
+        viewableEl = document.getElementById('viewableStatus');
 
     var openvv = new OpenVV({
       autostart:true,
@@ -18,12 +29,15 @@
     openvv
       .measureElement(element)
       .onViewableStart(function() {
-        console.log('Viewable Start',new Date().getTime())
+        console.log('Viewable Start',new Date().getTime());
+        inviewEl.innerHTML = 'In View'
       })
       .onViewableComplete(function() {
-        console.log('Viewable Complete',new Date().getTime())
+        console.log('Viewable Complete',new Date().getTime());
+        statusEl.setAttribute('data-viewable',true);
+        viewableEl.innerHTML = 'Viewable';
       })
-      .onUnMeasureable(function() {
+      .onUnmeasureable(function() {
         console.log('Unmeasureable');
       });
 

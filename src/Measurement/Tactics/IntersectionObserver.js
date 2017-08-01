@@ -1,17 +1,23 @@
-import AbstractMeasureable from './AbstractMeasureable';
+import AbstractTactic from './AbstractTactic';
 
-export default class IntersectionObserverMeasureable extends AbstractMeasureable {
+export default class IntersectionObserver extends AbstractTactic {
   constructor(element, criteria) {
     super();
-    if(criteria !== undefined && element && this.canMeasure()) {
+    if(criteria !== undefined && element) {
       this.element = element;
       this.criteria = criteria;
       this.inView = false;
+    }
+    else if(!element) {
+      throw 'element not provided';
     } 
+    else if(!criteria) {
+      throw 'criteria not provided';
+    }
   }
 
   start() {
-    this.observer = new IntersectionObserver(this.viewableChange.bind(this),{ threshold: criteria.inViewThreshold });
+    this.observer = new window.IntersectionObserver(this.viewableChange.bind(this),{ threshold: criteria.inViewThreshold });
     this.observer.observe(this.element);
   }
 

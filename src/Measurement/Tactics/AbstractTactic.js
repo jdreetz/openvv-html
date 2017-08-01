@@ -1,4 +1,4 @@
-export default class AbstractMeasureable {
+export default class AbstractTactic {
   constructor() {
     this.listeners = {
       inView:[],
@@ -11,6 +11,10 @@ export default class AbstractMeasureable {
   // element is in view according to strategy defined by concrete measurement class
   onInView(cb) {
     return this.addCallback(cb,'inView');
+  }
+
+  onViewChange(cb) {
+    return this.addCallback(cb,'viewChange');
   }
 
   // element no longer in view

@@ -17,10 +17,12 @@ export default class InViewTimer {
   }
 
   start() {
-    if(this.timer) {
-      clearTimeout(this.timer);
-    }
-    this.timer = setTimeout(this.timerComplete.bind(this),this.duration);
+    this.endTimer();
+    this.timer = setTimeout(this.timerComplete.bind(this), this.duration);
+  }
+
+  stop() {
+    this.endTimer();
   }
 
   pause() {
@@ -28,7 +30,14 @@ export default class InViewTimer {
   }
 
   resume() {
-    this.timer = setTimeout(this.timerComplete.bind(this),this.duration);
+    this.timer = setTimeout(this.timerComplete.bind(this), this.duration);
+  }
+
+  endTimer() {
+    if(this.timer) {
+      clearTimeout(this.timer);
+      this.listeners.length = 0;
+    }
   }
 
 }

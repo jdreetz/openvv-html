@@ -1,8 +1,8 @@
-import * as Tactics from '../Tactics/';
+import * as MeasurementTactics from '../MeasurementTactics/';
 import * as ViewabilityCriteria from '../../Options/ViewabilityCriteria';
 
 export const defaultStrategy = {
   autostart: true,
-  tactics: [Tactics.IntersectionObserver, Tactics.IntersectionObserverPolyfill],
+  tactics: [MeasurementTactics.IntersectionObserver, MeasurementTactics.IntersectionObserverPolyfill],
   criteria: ViewabilityCriteria.MRC_VIDEO
 };

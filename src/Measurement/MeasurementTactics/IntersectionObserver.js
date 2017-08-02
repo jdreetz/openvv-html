@@ -1,8 +1,8 @@
-import AbstractTactic from './AbstractTactic';
+import BaseTactic  from './BaseTactic';
 
-export default class IntersectionObserver extends AbstractTactic {
+export default class IntersectionObserver extends BaseTactic {
   constructor(element, criteria) {
-    super();
+    super(element, criteria);
     if(criteria !== undefined && element) {
       this.element = element;
       this.criteria = criteria;
@@ -22,7 +22,7 @@ export default class IntersectionObserver extends AbstractTactic {
   }
 
   get unmeasureable() {
-    return !window.IntersectionObserver;
+    return !window.IntersectionObserver && this.element.toString().indexOf('Element') > -1; // ensure intersection observer is available and element is an actual element and not a proxy
   }
 
   get viewable() {

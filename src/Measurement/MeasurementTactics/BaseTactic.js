@@ -1,4 +1,4 @@
-export default class AbstractTactic {
+export default class BaseTactic {
   constructor() {
     this.listeners = {
       inView:[],
@@ -26,6 +26,9 @@ export default class AbstractTactic {
     if(typeof callback === 'function' && this.listeners[event]) {
       this.listeners[event].push(callback);
     }
+    else if(typeof callback !== 'function') {
+      throw 'callback must be function';
+    }
 
     return this;
   }
@@ -38,7 +41,7 @@ export default class AbstractTactic {
     return false;
   }
 
-  start() {}
-  stop() {}
-  destroy() {}
+  get percentViewable() {
+    return this.percentViewable;
+  }
 }

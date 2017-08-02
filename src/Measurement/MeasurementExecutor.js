@@ -1,6 +1,7 @@
 import InViewTimer from '../Timing/InViewTimer';
 import { defaultStrategy } from './Strategies/';
-import * as Rules from './Strategies/rules';
+import { validTactic } from '../Helpers/';
+import * as Environment from '../Environment/Environment';
 
 // Responsible for collecting measurement strategy,
 // watching for measurement changes,
@@ -9,61 +10,66 @@ import * as Rules from './Strategies/rules';
 export default class MeasurementExecutor {
   constructor(element, strategy = {}) {
     this.timers = {};
-    this.listeners = { start: [], change: [], complete: [], unmeasureable: [] };
+    this.listeners = { start: [], stop: [], change: [], complete: [], unmeasureable: [] };
     this.element = element;
-    this.strategy = Object.assign({}, defaultStrategy, strategy); // ensure all strategy properties are included
-    // this.tactics = strategy
-    //                 .tactics
-    //                 .map(this.instantiateTactic.bind(this))
-    //                 .filter(this.strategy.technique_preference);
-
-    // this.selectedTactic = this.chooseTactic(this.tactics);
-
+    this.strategy = Object.assign({}, defaultStrategy, strategy); 
     this.tactic = this.selectTactic(this.strategy.tactics);
+    
+    if(this.tactic) {
+      this.addListeners(this.tactic);
+    }   
 
     if(this.unmeasureable) {
       // fire unmeasureable after current JS loop completes 
       // so opportunity is given for consumers to provide unmeasureable callback
       setTimeout( () => this.listeners.unmeasureable.forEach( m => m() ), 0);
     }
+    else if(this.startegy.autostart) {
+      this.tactic.start();
+    }
   }
 
-  instantiateTactic(ITactic) {
-    if(typeof ITactic === 'function') {
-      const instance = new ITactic(element,this.strategy.criteria);
-      
-      instance.id = new Date().getTime();
-      instance.onInView(this.tacticChange.bind(this,'inview',instance));
-      instance.onViewChange(this.tacticChange.bind(this,'change',instance));
-      instance.onOutView(this.tacticChange.bind(this,'outview',instance));
-      
-      if(this.strategy.autostart) {
-        instance.start();
-      }
+  // select first tactic that is not unmeasureable
+  selectTactic(tactics) {
+    return tactics
+            .filter(validTactic)
+            .map(this.instantiateTactic.bind(this))
+            .find(tactic => !tactic.unmeasureable);
+  }
 
-      return instance;
+  instantiateTactic(tactic) {
+    return instance = new tactic(element, this.strategy.criteria);
+  }
+
+  addListeners(tactic) {
+    if(tactic) {
+      tactic.onInView(this.tacticChange.bind(this,'inview',tactic));
+      tactic.onChangeView(this.tacticChange.bind(this,'change',tactic));
+      tactic.onOutView(this.tacticChange.bind(this,'outview',tactic));
     }
   }
 
   tacticChange(change, tactic) {
-    let timer = this.timers[tactic.id] || new InViewTimer(this.strategy.criteria.timeInView);
+    const details = this.appendEnvironment(this.tactic);
 
     switch(change) {
       case 'inview':
-        if(!timer) {
-          timer.elapsed(this.timerElapsed.bind(this, tactic));
-          this.timers[tactic.id] = timer;
-        }
+        this.timer = new InViewTimer(this.strategy.criteria.timeInView);
+        timer.elapsed(this.timerElasped.bind(this, tactic));
         timer.start();
-        this.listeners.start.forEach( l => l(tactic) );
+        this.listeners.start.forEach( l => l(details);
         break;
+
       case 'change':
-        this.listeners.change.forEach( l => l(tactic) );
+        this.listeners.change.forEach( l => l(details);
         break;
+
       case 'outview':
-        if(timer) {
-          timer.pause();
+        if(this.timer) {
+          this.timer.stop();
+          delete this.timer;
         }
+        this.listeners.stop.forEach( l => l(details);
         break;
     }
   }
@@ -84,17 +90,24 @@ export default class MeasurementExecutor {
   }
 
   get unmeasureable() {
-    // if all tactics are unmeasureable, return true, otherwise return false
-    return this.tactics.reduce( (t, unmeasureable) => t.unmeasureable && unmeasureable, true);
+    return !this.tactic || this.tactic.unmeasureable;
   }
 
   start() {
-    this.tactics.forEach( m => m.start && m.start() );
+    this.tactic.start();
+  }
+
+  appendEnvironment(tactic) {
+    return Object.assign({}, { percentViewable: tactic.percentViewable }, Environment.getDetails() );
   }
 
   // Main event dispatchers
   onViewableStart(callback) {
     return this.addCallback(callback, 'start');
+  }
+
+  onViewableStop(callback) {
+    return this.addCallback(callback), 'stop');
   }
 
   onViewableChange(callback) {

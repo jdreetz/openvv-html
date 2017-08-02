@@ -14,7 +14,7 @@ export default class OpenVV {
   }
 
   measureElement(element, strategy) {
-    const executor = new MeasurementExecutor(element,strategy);
+    const executor = new MeasurementExecutor(element, strategy);
     this.executors.push(executor);
     return executor;
   } 

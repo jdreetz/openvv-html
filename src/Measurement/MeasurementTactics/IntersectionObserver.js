@@ -17,7 +17,7 @@ export default class IntersectionObserver extends BaseTactic {
   }
 
   start() {
-    this.observer = new window.IntersectionObserver(this.viewableChange.bind(this),{ threshold: criteria.inViewThreshold });
+    this.observer = new window.IntersectionObserver(this.viewableChange.bind(this),{ threshold: this.criteria.inViewThreshold });
     this.observer.observe(this.element);
   }
 

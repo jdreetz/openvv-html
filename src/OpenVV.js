@@ -1,16 +1,15 @@
-import * as ViewabilityCriteria from './Options/ViewabilityCriteria';
+import * as Events from './Measurement/Events';
+import InViewTimer from './Timing/InViewTimer';
+import * as Strategies from './Measurement/Strategies/';
+import * as Environment from './Environment/Environment';
 import MeasurementExecutor from './Measurement/MeasurementExecutor';
-import * as Measureables from './Measurement/Measureables/';
-import * as Rules from './Measurement/Strategies/rules';
+import * as ViewabilityCriteria from './Options/ViewabilityCriteria';
+import * as MeasurementTactics from './Measurement/MeasurementTactics/';
 
 // Main entry point
 export default class OpenVV {
-  constructor(userDefaults) {
+  constructor() {
     this.executors = [];
-  }
-
-  configure(config) {
-    this.config = config;
   }
 
   measureElement(element, strategy) {
@@ -22,5 +21,8 @@ export default class OpenVV {
 
 // Expose support classes / constants
 OpenVV.ViewabilityCriteria = ViewabilityCriteria;
-OpenVV.Measureables = Measureables;
-OpenVV.Rules = Rules;
+OpenVV.MeasurementExecutor = MeasurementExecutor;
+OpenVV.MeasurementTactics = MeasurementTactics;
+OpenVV.InViewTimer = InViewTimer;
+OpenVV.Strategies = Strategies;
+OpenVV.Events = Events;

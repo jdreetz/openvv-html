@@ -13,7 +13,7 @@ export default class BaseTactic {
     return this.addCallback(cb,'inView');
   }
 
-  onViewChange(cb) {
+  onChangeView(cb) {
     return this.addCallback(cb,'viewChange');
   }
 
@@ -39,9 +39,5 @@ export default class BaseTactic {
 
   get viewable() {
     return false;
-  }
-
-  get percentViewable() {
-    return this.percentViewable;
   }
 }

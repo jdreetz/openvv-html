@@ -1,7 +1,8 @@
 import InViewTimer from '../Timing/InViewTimer';
 import { defaultStrategy } from './Strategies/';
-import { validTactic } from '../Helpers/';
+import { validTactic, validateStrategy } from '../Helpers/Validators';
 import * as Environment from '../Environment/Environment';
+import * as Events from './Events';
 
 // Responsible for collecting measurement strategy,
 // watching for measurement changes,
@@ -10,77 +11,121 @@ import * as Environment from '../Environment/Environment';
 export default class MeasurementExecutor {
   constructor(element, strategy = {}) {
     this.timers = {};
-    this.listeners = { start: [], stop: [], change: [], complete: [], unmeasureable: [] };
+    this._listeners = { start: [], stop: [], change: [], complete: [], unmeasureable: [] };
     this.element = element;
-    this.strategy = Object.assign({}, defaultStrategy, strategy); 
-    this.tactic = this.selectTactic(this.strategy.tactics);
+    this.strategy = Object.assign({}, defaultStrategy, strategy);
+
+    const validated = validateStrategy(this.strategy);
+
+    if(validated.invalid) {
+      throw validated.reasons;
+    }
+
+    this.tactic = this._selectTactic(this.strategy.tactics);
     
     if(this.tactic) {
-      this.addListeners(this.tactic);
+      this._addSubscriptions(this.tactic);
     }   
 
     if(this.unmeasureable) {
       // fire unmeasureable after current JS loop completes 
       // so opportunity is given for consumers to provide unmeasureable callback
-      setTimeout( () => this.listeners.unmeasureable.forEach( m => m() ), 0);
+      setTimeout( () => this._publish(Events.UNMEASUREABLE, Environment.getDetails(this.element)), 0);
     }
-    else if(this.startegy.autostart) {
+    else if(this.strategy.autostart) {
       this.tactic.start();
     }
   }
 
+  start() {
+    this.tactic.start();
+  }
+
+  onViewableStart(callback) {
+    return this._addCallback(callback, Events.START);
+  }
+
+  onViewableStop(callback) {
+    return this._addCallback(callback, Events.STOP);
+  }
+
+  onViewableChange(callback) {
+    return this._addCallback(callback, Events.CHANGE);
+  }
+
+  onViewableComplete(callback) {
+    return this._addCallback(callback, Events.COMPLETE);
+  }
+
+  onUnmeasureable(callback) {
+    return this._addCallback(callback, Events.UNMEASUREABLE);
+  }
+
+  get unmeasureable() {
+    return !this.tactic || this.tactic.unmeasureable;
+  }
+
   // select first tactic that is not unmeasureable
-  selectTactic(tactics) {
+  _selectTactic(tactics) {
     return tactics
             .filter(validTactic)
-            .map(this.instantiateTactic.bind(this))
+            .map(this._instantiateTactic.bind(this))
             .find(tactic => !tactic.unmeasureable);
   }
 
-  instantiateTactic(tactic) {
-    return instance = new tactic(element, this.strategy.criteria);
+  _instantiateTactic(tactic) {
+    return new tactic(element, this.strategy.criteria);
   }
 
-  addListeners(tactic) {
+  _addSubscriptions(tactic) {
     if(tactic) {
-      tactic.onInView(this.tacticChange.bind(this,'inview',tactic));
-      tactic.onChangeView(this.tacticChange.bind(this,'change',tactic));
-      tactic.onOutView(this.tacticChange.bind(this,'outview',tactic));
+      tactic.onInView(this._tacticChange.bind(this, Events.INVIEW, tactic));
+      tactic.onChangeView(this._tacticChange.bind(this, Events.CHANGE, tactic));
+      tactic.onOutView(this._tacticChange.bind(this, Events.OUTVIEW, tactic));
     }
   }
 
-  tacticChange(change, tactic) {
-    const details = this.appendEnvironment(this.tactic);
+  _tacticChange(change, tactic) {
+    let eventName;
+    const details = this._appendEnvironment(tactic);
 
     switch(change) {
-      case 'inview':
+      case Events.INVIEW:
         this.timer = new InViewTimer(this.strategy.criteria.timeInView);
-        timer.elapsed(this.timerElasped.bind(this, tactic));
-        timer.start();
-        this.listeners.start.forEach( l => l(details);
+        this.timer.elapsed(this._timerElapsed.bind(this, tactic));
+        this.timer.start();
+        eventName = Events.START;
         break;
 
-      case 'change':
-        this.listeners.change.forEach( l => l(details);
+      case Events.CHANGE:
+        eventName = Events.CHANGE;
         break;
 
-      case 'outview':
+      case Events.OUTVIEW:
         if(this.timer) {
           this.timer.stop();
           delete this.timer;
         }
-        this.listeners.stop.forEach( l => l(details);
+        eventName = Events.STOP;
         break;
+    }
+
+    this._publish(eventName, details);
+  }
+
+  _publish(event, value) {
+    if(Array.isArray(this._listeners[event])) {
+      this._listeners[event].forEach( l => l(value) );
     }
   }
 
-  timerElapsed(tactic) {
-    this.listeners.complete.forEach( l => l(tactic) );
+  _timerElapsed(tactic) {
+    this._publish(Events.COMPLETE, tactic);
   }
 
-  addCallback(callback, event) {
-    if(this.listeners[event] && typeof callback === 'function') {
-      this.listeners[event].push(callback);
+  _addCallback(callback, event) {
+    if(this._listeners[event] && typeof callback === 'function') {
+      this._listeners[event].push(callback);
     }
     else if(typeof callback !== 'function') {
       throw 'Callback must be a function';
@@ -89,36 +134,7 @@ export default class MeasurementExecutor {
     return this;
   }
 
-  get unmeasureable() {
-    return !this.tactic || this.tactic.unmeasureable;
-  }
-
-  start() {
-    this.tactic.start();
-  }
-
-  appendEnvironment(tactic) {
-    return Object.assign({}, { percentViewable: tactic.percentViewable }, Environment.getDetails() );
-  }
-
-  // Main event dispatchers
-  onViewableStart(callback) {
-    return this.addCallback(callback, 'start');
-  }
-
-  onViewableStop(callback) {
-    return this.addCallback(callback), 'stop');
-  }
-
-  onViewableChange(callback) {
-    return this.addCallback(callback, 'change');
-  }
-
-  onViewableComplete(callback) {
-    return this.addCallback(callback, 'complete');
-  }
-
-  onUnmeasureable(callback) {
-    return this.addCallback(callback,'unmeasureable');
+  _appendEnvironment(tactic) {
+    return Object.assign({}, { percentViewable: tactic.percentViewable }, Environment.getDetails(this.element) );
   }
 }

@@ -21,19 +21,19 @@
         statusEl = document.getElementById('statusContainer'),
         viewableEl = document.getElementById('viewableStatus');
 
-    var openvv = new OpenVV({
-      autostart:true,
-      criteria: OpenVV.ViewabilityCriteria.MRC_VIDEO
-    });
+    var openvv = new OpenVV();
 
     openvv
       .measureElement(element)
-      .onViewableStart(function() {
-        console.log('Viewable Start',new Date().getTime());
-        inviewEl.innerHTML = 'In View'
+      .onViewableStart(function(args) {
+        console.log('Viewable Start', new Date().toString(), args);
+        inviewEl.innerHTML = 'In View';
       })
-      .onViewableComplete(function() {
-        console.log('Viewable Complete',new Date().getTime());
+      .onViewableChange(function(args){
+        console.log('Viewable Change', new Date().toString(), args);
+      })
+      .onViewableComplete(function(args) {
+        console.log('Viewable Complete', new Date().toString(), args);
         statusEl.setAttribute('data-viewable',true);
         viewableEl.innerHTML = 'Viewable';
       })

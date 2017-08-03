@@ -1,4 +1,4 @@
-export const getDetails = (element) => {
+export const getDetails = ({ element }) => {
   return {
     viewportWidth: Math.max(document.body.clientWidth, window.innerWidth),
     viewportHeight: Math.max(document.body.clientHeight, window.innerHeight),

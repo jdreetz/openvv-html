@@ -30,7 +30,7 @@ export default class MeasurementExecutor {
     if(this.unmeasureable) {
       // fire unmeasureable after current JS loop completes 
       // so opportunity is given for consumers to provide unmeasureable callback
-      setTimeout( () => this._publish(Events.UNMEASUREABLE, Environment.getDetails(this.element)), 0);
+      setTimeout( () => this._publish(Events.UNMEASUREABLE, Environment.getDetails(this)), 0);
     }
     else if(this.strategy.autostart) {
       this.tactic.start();
@@ -98,7 +98,11 @@ export default class MeasurementExecutor {
         break;
 
       case Events.CHANGE:
-        eventName = Events.CHANGE;
+        eventName = change;
+        break;
+
+      case Events.COMPLETE:
+        eventName = change;
         break;
 
       case Events.OUTVIEW:
@@ -120,7 +124,7 @@ export default class MeasurementExecutor {
   }
 
   _timerElapsed(tactic) {
-    this._publish(Events.COMPLETE, tactic);
+    this._tacticChange(Events.COMPLETE, tactic);
   }
 
   _addCallback(callback, event) {
@@ -135,6 +139,6 @@ export default class MeasurementExecutor {
   }
 
   _appendEnvironment(tactic) {
-    return Object.assign({}, { percentViewable: tactic.percentViewable }, Environment.getDetails(this.element) );
+    return Object.assign({}, { percentViewable: tactic.percentViewable, tactic: tactic.tacticName }, Environment.getDetails(this) );
   }
 }

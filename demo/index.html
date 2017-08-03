@@ -29,6 +29,9 @@
         console.log('Viewable Start', new Date().toString(), args);
         inviewEl.innerHTML = 'In View';
       })
+      .onViewableStop(function(args) {
+        console.log('Viewable Stop', new Date().toString(), args);
+      })
       .onViewableChange(function(args){
         console.log('Viewable Change', new Date().toString(), args);
       })

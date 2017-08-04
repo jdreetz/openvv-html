@@ -1,8 +1,9 @@
-export default class BaseTactic {
+export default class BaseTechnique {
   constructor() {
     this.listeners = {
       inView:[],
-      outView:[]
+      outView:[],
+      changeView:[]
     };
 
     this.percentViewable = 0.0;
@@ -14,7 +15,7 @@ export default class BaseTactic {
   }
 
   onChangeView(cb) {
-    return this.addCallback(cb,'viewChange');
+    return this.addCallback(cb,'changeView');
   }
 
   // element no longer in view
@@ -33,11 +34,17 @@ export default class BaseTactic {
     return this;
   }
 
+  dispose() {}
+
   get unmeasureable() {
     return false;
   }
 
   get viewable() {
     return false;
+  }
+
+  get techniqueName() {
+    return 'BaseTechnique';
   }
 }

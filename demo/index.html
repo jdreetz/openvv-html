@@ -3,47 +3,26 @@
 <head>
   <meta charset="utf-8">
   <title>OpenVV Demo</title>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
   <script type="text/javascript" src="../dist/openvv.js"></script>  
   <link rel="stylesheet" type="text/css" href="main.css">
 </head>
 <body>
-  <div id="statusContainer">
+  <div id="statusContainer" v-bind:data-viewable="criteriaMet">
     <ul>
-      <li>In View: <span id="inviewStatus">Not In View</span></li>
-      <li>Viewable: <span id="viewableStatus">Not Viewable</span></li>
+      <li>Viewable Above Threshold ({{ threshold * 100 }}%):  {{ viewable }}</span></li>
+      <li>Viewability Criteria Met: {{ criteriaMet }}</li>
+      <hr/>
+      <li>Viewable Technique: {{ technique }}</li>
+      <li>Viewport: {{ viewportWidth + ' x ' + viewportHeight }}</li>
+      <li>Element: {{ elementWidth + ' x ' + elementHeight }}</li>
+      <li>Focus: {{ focus }}</li>
+      <li>Percent Viewable: {{ (percentViewable * 100).toFixed(2) }}%</li>
+      <li>Unmeasureable: {{ unmeasureable }}</li>
+      <li>iFrameContext: {{ iframeContext }}</li>
     </ul>
   </div>
   <video id="elementToMeasure" src="sample.mp4" controls></video>
-
-  <script type="text/javascript">
-    var element = document.getElementById('elementToMeasure'), 
-        inviewEl = document.getElementById('inviewStatus'),
-        statusEl = document.getElementById('statusContainer'),
-        viewableEl = document.getElementById('viewableStatus');
-
-    var openvv = new OpenVV();
-
-    openvv
-      .measureElement(element)
-      .onViewableStart(function(args) {
-        console.log('Viewable Start', new Date().toString(), args);
-        inviewEl.innerHTML = 'In View';
-      })
-      .onViewableStop(function(args) {
-        console.log('Viewable Stop', new Date().toString(), args);
-      })
-      .onViewableChange(function(args){
-        console.log('Viewable Change', new Date().toString(), args);
-      })
-      .onViewableComplete(function(args) {
-        console.log('Viewable Complete', new Date().toString(), args);
-        statusEl.setAttribute('data-viewable',true);
-        viewableEl.innerHTML = 'Viewable';
-      })
-      .onUnmeasureable(function() {
-        console.log('Unmeasureable');
-      });
-
-  </script>
+  <script type="text/javascript" src="demo.js"></script>
 </body>
 </html>

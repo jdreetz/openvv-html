@@ -1,6 +1,6 @@
 import InViewTimer from '../Timing/InViewTimer';
 import { defaultStrategy } from './Strategies/';
-import { validTactic, validateStrategy } from '../Helpers/Validators';
+import { validTechnique, validateStrategy } from '../Helpers/Validators';
 import * as Environment from '../Environment/Environment';
 import * as Events from './Events';
 
@@ -10,37 +10,48 @@ import * as Events from './Events';
 // and notifying listeners of changes
 export default class MeasurementExecutor {
   constructor(element, strategy = {}) {
-    this.timers = {};
     this._listeners = { start: [], stop: [], change: [], complete: [], unmeasureable: [] };
-    this.element = element;
-    this.strategy = Object.assign({}, defaultStrategy, strategy);
+    this._element = element;
+    this._strategy = Object.assign({}, defaultStrategy, strategy);
+    this._criteriaMet = false;
 
-    const validated = validateStrategy(this.strategy);
+    const validated = validateStrategy(this._strategy);
 
     if(validated.invalid) {
       throw validated.reasons;
     }
 
-    this.tactic = this._selectTactic(this.strategy.tactics);
+    this._technique = this._selectTechnique(this._strategy.techniques);
     
-    if(this.tactic) {
-      this._addSubscriptions(this.tactic);
+    if(this._technique) {
+      this._addSubscriptions(this._technique);
     }   
 
     if(this.unmeasureable) {
       // fire unmeasureable after current JS loop completes 
       // so opportunity is given for consumers to provide unmeasureable callback
-      setTimeout( () => this._publish(Events.UNMEASUREABLE, Environment.getDetails(this)), 0);
+      setTimeout( () => this._publish(Events.UNMEASUREABLE, Environment.getDetails(this._element)), 0);
     }
-    else if(this.strategy.autostart) {
-      this.tactic.start();
+    else if(this._strategy.autostart) {
+      this._technique.start();
     }
   }
 
   start() {
-    this.tactic.start();
+    this._technique.start();
   }
 
+  dispose() {
+    if(this._technique) {
+      this._technique.dispose();
+    }
+    if(this.timer) {
+      this.timer.dispose();
+    }
+
+  }
+
+  // Expose callback interfaces to API consumer
   onViewableStart(callback) {
     return this._addCallback(callback, Events.START);
   }
@@ -62,39 +73,42 @@ export default class MeasurementExecutor {
   }
 
   get unmeasureable() {
-    return !this.tactic || this.tactic.unmeasureable;
+    return !this._technique || this._technique.unmeasureable;
   }
 
-  // select first tactic that is not unmeasureable
-  _selectTactic(tactics) {
-    return tactics
-            .filter(validTactic)
-            .map(this._instantiateTactic.bind(this))
-            .find(tactic => !tactic.unmeasureable);
+  // select first technique that is not unmeasureable
+  _selectTechnique(techniques) {
+    return techniques
+            .filter(validTechnique)
+            .map(this._instantiateTechnique.bind(this))
+            .find(technique => !technique.unmeasureable);
   }
 
-  _instantiateTactic(tactic) {
-    return new tactic(element, this.strategy.criteria);
+  _instantiateTechnique(technique) {
+    return new technique(element, this._strategy.criteria);
   }
 
-  _addSubscriptions(tactic) {
-    if(tactic) {
-      tactic.onInView(this._tacticChange.bind(this, Events.INVIEW, tactic));
-      tactic.onChangeView(this._tacticChange.bind(this, Events.CHANGE, tactic));
-      tactic.onOutView(this._tacticChange.bind(this, Events.OUTVIEW, tactic));
+  _addSubscriptions(technique) {
+    if(technique) {
+      technique.onInView(this._techniqueChange.bind(this, Events.INVIEW, technique));
+      technique.onChangeView(this._techniqueChange.bind(this, Events.CHANGE, technique));
+      technique.onOutView(this._techniqueChange.bind(this, Events.OUTVIEW, technique));
     }
   }
 
-  _tacticChange(change, tactic) {
+  _techniqueChange(change, technique) {
     let eventName;
-    const details = this._appendEnvironment(tactic);
+    const details = this._appendEnvironment(technique);
 
     switch(change) {
       case Events.INVIEW:
-        this.timer = new InViewTimer(this.strategy.criteria.timeInView);
-        this.timer.elapsed(this._timerElapsed.bind(this, tactic));
-        this.timer.start();
-        eventName = Events.START;
+        if(!this._criteriaMet){
+          this.timer = new InViewTimer(this._strategy.criteria.timeInView);
+          this.timer.elapsed(this._timerElapsed.bind(this, technique));
+          this.timer.start();
+          eventName = Events.START;
+        }
+        
         break;
 
       case Events.CHANGE:
@@ -102,19 +116,28 @@ export default class MeasurementExecutor {
         break;
 
       case Events.COMPLETE:
-        eventName = change;
+        if(!this._criteriaMet) {
+          this._criteriaMet = true;
+          eventName = change;
+        }
+        
         break;
 
       case Events.OUTVIEW:
-        if(this.timer) {
-          this.timer.stop();
-          delete this.timer;
+        if(!this._criteriaMet) {
+          if(this.timer) {
+            this.timer.stop();
+            delete this.timer;
+          }
+          eventName = Events.STOP;
         }
-        eventName = Events.STOP;
+        
         break;
     }
 
-    this._publish(eventName, details);
+    if(eventName) {
+      this._publish(eventName, details);
+    }
   }
 
   _publish(event, value) {
@@ -123,8 +146,8 @@ export default class MeasurementExecutor {
     }
   }
 
-  _timerElapsed(tactic) {
-    this._tacticChange(Events.COMPLETE, tactic);
+  _timerElapsed(technique) {
+    this._techniqueChange(Events.COMPLETE, technique);
   }
 
   _addCallback(callback, event) {
@@ -138,7 +161,15 @@ export default class MeasurementExecutor {
     return this;
   }
 
-  _appendEnvironment(tactic) {
-    return Object.assign({}, { percentViewable: tactic.percentViewable, tactic: tactic.tacticName }, Environment.getDetails(this) );
+  _appendEnvironment(technique) {
+    return Object.assign(
+      {}, 
+      { 
+        percentViewable: technique.percentViewable, 
+        technique: technique.techniqueName, 
+        viewable: technique.viewable 
+      }, 
+      Environment.getDetails(this._element) 
+    );
   }
 }

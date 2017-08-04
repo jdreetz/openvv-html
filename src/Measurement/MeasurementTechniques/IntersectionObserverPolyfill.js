@@ -8,7 +8,7 @@ export default class IntersectionObserverPolyfill extends IntersectionObserver {
     return Environment.iFrameContext() === Environment.iFrameServingScenarios.CROSS_DOMAIN_IFRAME;
   }
 
-  get tacticName() {
+  get techniqueName() {
     return 'IntersectionObserverPolyFill';
   }
 }

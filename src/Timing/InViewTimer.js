@@ -40,4 +40,8 @@ export default class InViewTimer {
     }
   }
 
+  dispose() {
+    this.endTimer();
+  }
+
 }

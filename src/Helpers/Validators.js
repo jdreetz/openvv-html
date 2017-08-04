@@ -1,14 +1,18 @@
-import BaseTactic from '../Measurement/MeasurementTactics/BaseTactic';
+import BaseTechnique from '../Measurement/MeasurementTechniques/BaseTechnique';
 
-// ensure tactic atleast has the same properties and methods of AbstractTimer
-export const validTactic = (tactic) => {
+// ensure technique atleast has the same properties and methods of AbstractTimer
+export const validTechnique = (technique) => {
   const valid = 
-    typeof tactic === 'function' &&
+    typeof technique === 'function' &&
     Object
-      .getOwnPropertyNames(BaseTactic)
-      .reduce( (prop, valid) => valid && typeof tactic[prop] === typeof BaseTactic[prop], true);
+      .getOwnPropertyNames(BaseTechnique)
+      .reduce( (prop, valid) => valid && typeof technique[prop] === typeof BaseTechnique[prop], true);
 
   return valid;
+};
+
+export const validElement = (element) => {
+  return element && element.toString().indexOf('Element') > -1;
 };
 
 export const validateCriteria = ({ inViewThreshold, timeInView }) => {
@@ -27,7 +31,7 @@ export const validateCriteria = ({ inViewThreshold, timeInView }) => {
   return { invalid, reasons: reasons.join(' | ') };
 };
 
-export const validateStrategy = ({ autostart, tactics, criteria }) => {
+export const validateStrategy = ({ autostart, techniques, criteria }) => {
   let invalid = false, reasons = [];
 
   if(typeof autostart !== 'boolean') {
@@ -35,9 +39,9 @@ export const validateStrategy = ({ autostart, tactics, criteria }) => {
     reasons.push('autostart must be boolean');
   }
 
-  if(!Array.isArray(tactics) || tactics.length === 0) {
+  if(!Array.isArray(techniques) || techniques.length === 0) {
     invalid = true;
-    reasons.push('tactics must be an array containing atleast on measurement tactics');
+    reasons.push('techniques must be an array containing atleast on measurement techniques');
   }
 
   const validated = validateCriteria(criteria);

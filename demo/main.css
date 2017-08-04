@@ -1,12 +1,27 @@
+body {
+  font-family: sans-serif;  
+  font-weight: lighter;
+}
+
 #statusContainer {
   position: fixed;
-  width: 128px;
-  height: 96px;
-  background: gray;
+  background: #dadada;
+  right: 0;
+  top: 0;
 }
 
 #statusContainer[data-viewable="true"] {
-  background: green;
+  background: #1fc51f;
+}
+
+#statusContainer ul {
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+}
+
+#statusContainer hr {
+  border-style: dashed;
 }
 
 #elementToMeasure {

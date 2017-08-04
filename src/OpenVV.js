@@ -4,7 +4,7 @@ import * as Strategies from './Measurement/Strategies/';
 import * as Environment from './Environment/Environment';
 import MeasurementExecutor from './Measurement/MeasurementExecutor';
 import * as ViewabilityCriteria from './Options/ViewabilityCriteria';
-import * as MeasurementTactics from './Measurement/MeasurementTactics/';
+import * as MeasurementTechniques from './Measurement/MeasurementTechniques/';
 
 // Main entry point
 export default class OpenVV {
@@ -22,7 +22,7 @@ export default class OpenVV {
 // Expose support classes / constants
 OpenVV.ViewabilityCriteria = ViewabilityCriteria;
 OpenVV.MeasurementExecutor = MeasurementExecutor;
-OpenVV.MeasurementTactics = MeasurementTactics;
+OpenVV.MeasurementTechniques = MeasurementTechniques;
 OpenVV.InViewTimer = InViewTimer;
 OpenVV.Strategies = Strategies;
 OpenVV.Events = Events;

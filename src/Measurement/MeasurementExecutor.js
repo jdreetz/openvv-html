@@ -4,15 +4,24 @@ import { validTechnique, validateStrategy } from '../Helpers/Validators';
 import * as Environment from '../Environment/Environment';
 import * as Events from './Events';
 
-// Responsible for collecting measurement strategy,
-// watching for measurement changes,
-// tracking how long an element is viewable for,
-// and notifying listeners of changes
+/**
+ * Class representing a measurement executor
+ */
 export default class MeasurementExecutor {
+  /**
+   * Create a new instance of a MeasurementExecutor
+   * @param {HTMLElement} element - a HTML element to measure
+   * @param {Object} strategy - a strategy object defining the measurement techniques and what criteria constitute a viewable state.
+   * See OpenVV.Strategies defaultStrategy and StrategyFactory for more details on required params
+   */
   constructor(element, strategy = {}) {
+    /** @private {Object} event listener arrays */
     this._listeners = { start: [], stop: [], change: [], complete: [], unmeasureable: [] };
+    /** @private {HTMLElement} HTML element to measure */
     this._element = element;
+    /** @private {Object} measurement strategy */
     this._strategy = Object.assign({}, defaultStrategy, strategy);
+    /** @private {Boolean} tracks whether viewability criteria has been met */
     this._criteriaMet = false;
 
     const validated = validateStrategy(this._strategy);
@@ -21,6 +30,7 @@ export default class MeasurementExecutor {
       throw validated.reasons;
     }
 
+    /** @private {BaseTechnique} technique to measure viewability with */
     this._technique = this._selectTechnique(this._strategy.techniques);
     
     if(this._technique) {
@@ -37,10 +47,12 @@ export default class MeasurementExecutor {
     }
   }
 
+  /** starts viewability measurment using the selected technique */
   start() {
     this._technique.start();
   }
 
+  /** dispose the measurment technique and any timers */
   dispose() {
     if(this._technique) {
       this._technique.dispose();
@@ -48,13 +60,21 @@ export default class MeasurementExecutor {
     if(this.timer) {
       this.timer.dispose();
     }
-
   }
 
-  // Expose callback interfaces to API consumer
+  /**
+   * Handle viewability tracking start
+   * @param  {Function~viewableStartCallback} callback - is called when viewability starts tracking
+   * @return {MeasurmentExecutor} - returns instance of MeasurementExecutor associated with this callback
+   */
   onViewableStart(callback) {
     return this._addCallback(callback, Events.START);
   }
+
+  /**
+   * @callback Function~viewableStartCallback
+   * @param {Object} details - environment and measurement details of viewable event
+   */
 
   onViewableStop(callback) {
     return this._addCallback(callback, Events.STOP);
@@ -65,11 +85,19 @@ export default class MeasurementExecutor {
   }
 
   onViewableComplete(callback) {
-    return this._addCallback(callback, Events.COMPLETE);
+    this._addCallback(callback, Events.COMPLETE);
+    if(this.criteriaMet) {
+      this._techniqueChange(Events.COMPLETE, this._technique);
+    }
+    return this;
   }
 
   onUnmeasureable(callback) {
-    return this._addCallback(callback, Events.UNMEASUREABLE);
+    this._addCallback(callback, Events.UNMEASUREABLE);
+    if(this.unmeasureable) {
+      this._techniqueChange(Events.UNMEASUREABLE)
+    }
+    return this;
   }
 
   get unmeasureable() {
@@ -96,7 +124,7 @@ export default class MeasurementExecutor {
     }
   }
 
-  _techniqueChange(change, technique) {
+  _techniqueChange(change, technique = {}) {
     let eventName;
     const details = this._appendEnvironment(technique);
 
@@ -133,6 +161,9 @@ export default class MeasurementExecutor {
         }
         
         break;
+
+      case Events.UNMEASUREABLE: 
+        eventName = Events.UNMEASUREABLE;
     }
 
     if(eventName) {
@@ -165,9 +196,9 @@ export default class MeasurementExecutor {
     return Object.assign(
       {}, 
       { 
-        percentViewable: technique.percentViewable, 
-        technique: technique.techniqueName, 
-        viewable: technique.viewable 
+        percentViewable: technique.percentViewable || -1, 
+        technique: technique.techniqueName || -1, 
+        viewable: technique.viewable || -1 
       }, 
       Environment.getDetails(this._element) 
     );

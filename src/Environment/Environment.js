@@ -1,9 +1,9 @@
-export const getDetails = (element) => {
+export const getDetails = (element = {}) => {
   return {
-    viewportWidth: Math.max(document.body.clientWidth, window.innerWidth),
-    viewportHeight: Math.max(document.body.clientHeight, window.innerHeight),
-    elementWidth: element.clientWidth,
-    elementHeight: element.clientHeight,
+    viewportWidth: Math.max(document.body.clientWidth, window.innerWidth) || -1,
+    viewportHeight: Math.max(document.body.clientHeight, window.innerHeight) || -1,
+    elementWidth: element.clientWidth || -1,
+    elementHeight: element.clientHeight || -1,
     iframeContext: iFrameContext(),
     focus: isInFocus()
   }

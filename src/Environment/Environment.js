@@ -1,3 +1,9 @@
+/**
+ * Environment Module
+ * @module Environment/Environment
+ * represents functions that describe the current environment the meausrement library is running in
+ */
+
 export const getDetails = (element = {}) => {
   return {
     viewportWidth: Math.max(document.body.clientWidth, window.innerWidth) || -1,

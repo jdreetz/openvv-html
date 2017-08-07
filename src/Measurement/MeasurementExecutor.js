@@ -279,9 +279,9 @@ export default class MeasurementExecutor {
     return Object.assign(
       {}, 
       { 
-        percentViewable: technique.percentViewable || -1, 
+        percentViewable: typeof technique.percentViewable === 'undefined' ? -1 : technique.percentViewable, 
         technique: technique.techniqueName || -1, 
-        viewable: technique.viewable || -1 
+        viewable: typeof technique.viewable === 'undefined' ? -1 : technique.viewable 
       }, 
       Environment.getDetails(this._element) 
     );

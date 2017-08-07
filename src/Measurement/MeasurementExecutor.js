@@ -1,5 +1,5 @@
 import InViewTimer from '../Timing/InViewTimer';
-import { defaultStrategy } from './Strategies/';
+import { DEFAULT_STRATEGY } from './Strategies/';
 import { validTechnique, validateStrategy } from '../Helpers/Validators';
 import * as Environment from '../Environment/Environment';
 import * as Events from './Events';
@@ -12,7 +12,7 @@ export default class MeasurementExecutor {
    * Create a new instance of a MeasurementExecutor
    * @param {HTMLElement} element - a HTML element to measure
    * @param {Object} strategy - a strategy object defining the measurement techniques and what criteria constitute a viewable state.
-   * See OpenVV.Strategies defaultStrategy and StrategyFactory for more details on required params
+   * See OpenVV.Strategies DEFAULT_STRATEGY and StrategyFactory for more details on required params
    */
   constructor(element, strategy = {}) {
     /** @private {Object} event listener arrays */
@@ -20,7 +20,7 @@ export default class MeasurementExecutor {
     /** @private {HTMLElement} HTML element to measure */
     this._element = element;
     /** @private {Object} measurement strategy */
-    this._strategy = Object.assign({}, defaultStrategy, strategy);
+    this._strategy = Object.assign({}, DEFAULT_STRATEGY, strategy);
     /** @private {Boolean} tracks whether viewability criteria has been met */
     this._criteriaMet = false;
 
@@ -47,12 +47,18 @@ export default class MeasurementExecutor {
     }
   }
 
-  /** starts viewability measurment using the selected technique */
+  /** 
+   * starts viewability measurment using the selected technique
+   * @public
+   */
   start() {
     this._technique.start();
   }
 
-  /** dispose the measurment technique and any timers */
+  /**
+   * dispose the measurment technique and any timers
+   * @public
+   */
   dispose() {
     if(this._technique) {
       this._technique.dispose();
@@ -64,7 +70,8 @@ export default class MeasurementExecutor {
 
   /**
    * Handle viewability tracking start
-   * @param  {Function~viewableStartCallback} callback - is called when viewability starts tracking
+   * @public
+   * @param  {Function~viewableCallback} callback - is called when viewability starts tracking
    * @return {MeasurmentExecutor} - returns instance of MeasurementExecutor associated with this callback
    */
   onViewableStart(callback) {
@@ -72,39 +79,74 @@ export default class MeasurementExecutor {
   }
 
   /**
-   * @callback Function~viewableStartCallback
-   * @param {Object} details - environment and measurement details of viewable event
+   * Handle viewability tracking stop.
+   * @public
+   * @param {Function~viewableCallback} callback - is called when viewability has previously started, but element is now out of view
+   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
    */
-
   onViewableStop(callback) {
     return this._addCallback(callback, Events.STOP);
   }
 
+  /**
+   * Handle viewability change.
+   * @public
+   * @param  {Function~viewableCallback} callback - called when the viewable percentage of the element has changed
+   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   */
   onViewableChange(callback) {
     return this._addCallback(callback, Events.CHANGE);
   }
 
+  /**
+   * Handle viewability complete.
+   * @public
+   * @param  {Function~viewableCallback} callback - called when element has been in view for the duration specified in the measurement strategy config
+   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   */
   onViewableComplete(callback) {
     this._addCallback(callback, Events.COMPLETE);
+    // if viewablity criteria already met, fire callback immediately
     if(this.criteriaMet) {
       this._techniqueChange(Events.COMPLETE, this._technique);
     }
     return this;
   }
 
+  /**
+   * Handle unmeasureable event
+   * @public
+   * @param  {Function~viewableCallback} callback - called when no suitable measurement techniques are available from the techniques provided
+   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   */
   onUnmeasureable(callback) {
     this._addCallback(callback, Events.UNMEASUREABLE);
+    // if executor is already unmeasureable, fire callback immediately
     if(this.unmeasureable) {
       this._techniqueChange(Events.UNMEASUREABLE)
     }
     return this;
   }
 
+   /**
+   * @callback Function~viewableCallback
+   * @param {Object} details - environment and measurement details of viewable event
+   * @return {MeasurmentExecutor} - returns instance of MeasurementExecutor associated with this callback
+   */
+
+  /**
+   * @return {Boolean} - whether MeasurementExecutor instance is capable of measuring viewability
+   */
   get unmeasureable() {
     return !this._technique || this._technique.unmeasureable;
   }
 
-  // select first technique that is not unmeasureable
+  /**
+   * Instantiates and filters list of available measurement technqiues to the first unmeasureable technique
+   * @private
+   * @param  {Array} - list of techniques available to measure viewability with
+   * @return {BaseTechnique} - selected technique
+   */
   _selectTechnique(techniques) {
     return techniques
             .filter(validTechnique)
@@ -112,10 +154,21 @@ export default class MeasurementExecutor {
             .find(technique => !technique.unmeasureable);
   }
 
+  /**
+   * creates instance of technique
+   * @private
+   * @param  {Function} - technique constructor
+   * @return {BaseTechnique} - instance of technique provided
+   */
   _instantiateTechnique(technique) {
     return new technique(element, this._strategy.criteria);
   }
 
+  /**
+   * adds event listeners to technique 
+   * @private
+   * @param {BaseTechnique} - technique to add event listeners to
+   */
   _addSubscriptions(technique) {
     if(technique) {
       technique.onInView(this._techniqueChange.bind(this, Events.INVIEW, technique));
@@ -124,6 +177,12 @@ export default class MeasurementExecutor {
     }
   }
 
+  /**
+   * handles viewable change events from a measurement technique
+   * @private
+   * @param  {String} - change type. See Measurement/Events module for list of changes
+   * @param  {Object} - technique that reported change. May be undefined in case of unmeasureable event
+   */
   _techniqueChange(change, technique = {}) {
     let eventName;
     const details = this._appendEnvironment(technique);
@@ -171,16 +230,34 @@ export default class MeasurementExecutor {
     }
   }
 
+  /**
+   * publishes events to available listeners
+   * @private
+   * @param  {String} - event name
+   * @param  {*} - value to call callback with
+   */
   _publish(event, value) {
     if(Array.isArray(this._listeners[event])) {
       this._listeners[event].forEach( l => l(value) );
     }
   }
 
+  /**
+   * callback for timer elapsed 
+   * @private
+   * @param  {BaseTechnique} - technique used to perform measurement
+   */
   _timerElapsed(technique) {
     this._techniqueChange(Events.COMPLETE, technique);
   }
 
+  /**
+   * Associates callback function with event 
+   * @private
+   * @param {Function} - callback function to associate with event
+   * @param {String} event - event to associate callback function with
+   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   */
   _addCallback(callback, event) {
     if(this._listeners[event] && typeof callback === 'function') {
       this._listeners[event].push(callback);
@@ -192,6 +269,12 @@ export default class MeasurementExecutor {
     return this;
   }
 
+  /**
+   * Combines environment details with measurement technique details
+   * @private
+   * @param  {BaseTechnique} - technique to get measurement details from 
+   * @return {Object} - Environment details and measurement details combined
+   */
   _appendEnvironment(technique) {
     return Object.assign(
       {}, 

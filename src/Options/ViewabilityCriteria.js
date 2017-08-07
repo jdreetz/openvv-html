@@ -27,6 +27,6 @@ export const MRC_DISPLAY = {
  * Creates custom criteria object using the threshold and duration provided 
  * @param  {Number} - amount element must be in view before it is considered in view
  * @param  {Number} - how long element must be in view before it is considered viewable
- * @return {Object} - object containing appropriately named properties to be used as viewability criteria 
+ * @return {Object} object containing appropriately named properties to be used as viewability criteria 
  */
 export const customCriteria = (inViewThreshold = 0.5, timeInView = 2000) => ({ inViewThreshold, timeInView });

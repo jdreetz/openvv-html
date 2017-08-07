@@ -6,10 +6,10 @@ export default class InViewTimer {
    * Creates new instance of an InViewTimer
    * @constructor
    * @param  {Number} duration - when to fire elapsed callback
-   * @return {InViewTimer} - instance of InViewTimer
+   * @return {InViewTimer} instance of InViewTimer
    */
   constructor(duration) {
-    this.duration = duration;      
+    this.duration = duration;
     this.listeners = [];
     this.completed = false;
   }

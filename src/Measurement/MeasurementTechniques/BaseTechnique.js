@@ -5,7 +5,7 @@
 export default class BaseTechnique {
   /**
    * @constructor
-   * @return {BaseTechnique} - instance of BaseTechnique
+   * @return {BaseTechnique} instance of BaseTechnique
    */
   constructor() {
     this.listeners = {
@@ -19,8 +19,8 @@ export default class BaseTechnique {
 
   /**
    * Defines callback to call when technique determines element is in view
-   * @param  {Function~changeCallback} - callback to call when element is in view
-   * @return {BaseTechnique} - instance of BaseTechnique associated with callback. Can be used to chain callback definitions.
+   * @param  {changeCallback} - callback to call when element is in view
+   * @return {BaseTechnique} instance of BaseTechnique associated with callback. Can be used to chain callback definitions.
    */
   onInView(cb) {
     return this.addCallback(cb,'inView');
@@ -28,8 +28,8 @@ export default class BaseTechnique {
 
   /**
    * Defines callback to call when technique determines element viewability has changed
-   * @param  {Function~changeCallback} - callback to call when element's viewability has changed
-   * @return {BaseTechnique} - instance of BaseTechnique associated with callback. Can be used to chain callback definitions.
+   * @param  {changeCallback} - callback to call when element's viewability has changed
+   * @return {BaseTechnique} instance of BaseTechnique associated with callback. Can be used to chain callback definitions.
    */
   onChangeView(cb) {
     return this.addCallback(cb,'changeView');
@@ -37,15 +37,15 @@ export default class BaseTechnique {
 
   /**
    * Defines callback to call when technique determines element is no longer in view
-   * @param  {Function~changeCallback} - callback to call when element is no longer in view
-   * @return {BaseTechnique} - instance of BaseTechnique associated with callback. Can be used to chain callback definitions.
+   * @param  {changeCallback} - callback to call when element is no longer in view
+   * @return {BaseTechnique} instance of BaseTechnique associated with callback. Can be used to chain callback definitions.
    */
   onOutView(cb) {
     return this.addCallback(cb,'outView');
   }
 
   /**
-   * @callback Function~changeCallback
+   * @callback changeCallback
    */
 
   /**
@@ -64,27 +64,32 @@ export default class BaseTechnique {
     return this;
   }
 
+  /** 
+   * empty start member. should be implemented by inheritting class
+   */
+  start() {}
+
   /**
    * empty dispose member. should be implemented by inheritting class
    */
   dispose() {}
 
   /**
-   * @return {Boolean} - defines whether the technique is capable of measuring in the current environment
+   * @return {Boolean} defines whether the technique is capable of measuring in the current environment
    */
   get unmeasureable() {
     return false;
   }
 
   /**
-   * @return {Boolean} - defines whether the technique has determined that the measured element is in view
+   * @return {Boolean} defines whether the technique has determined that the measured element is in view
    */
   get viewable() {
     return false;
   }
 
   /**
-   * @return {String} - name of the measurement technique
+   * @return {String} name of the measurement technique
    */
   get techniqueName() {
     return 'BaseTechnique';

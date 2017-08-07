@@ -21,9 +21,9 @@ export const DEFAULT_STRATEGY = {
 /**
  * Create strategy object using the provided values
  * @param  {Boolean} autostart - whether measurement should start immediately
- * @param  {Array} techniques - list of techniques to use for measurement. First non-unmeasureable technique will be used
+ * @param  {Array.<BaseTechnique>} techniques - list of techniques to use for measurement. First non-unmeasureable technique will be used
  * @param  {Object} criteria - criteria object. See Options/ViewabilityCriteria for pre-defined criteria and criteria factory
- * @return {Object} - object containing appropriately named properties to be used as measurement strategy
+ * @return {Object} object containing appropriately named properties to be used as measurement strategy
  */
 export const StrategyFactory = (autostart = DEFAULT_STRATEGY.autostart, techniques = DEFAULT_STRATEGY.techniques, criteria = DEFAULT_STRATEGY.criteria) => {
   const strategy = { autostart, techniques, criteria },

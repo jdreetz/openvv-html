@@ -4,6 +4,10 @@
  * represents functions that describe the current environment the meausrement library is running in
  */
 
+/**
+ * @param  {HTMLElement} element - a HTML element to get properties from 
+ * @return {Object} an object describing the various pertitnent environment details
+ */
 export const getDetails = (element = {}) => {
   return {
     viewportWidth: Math.max(document.body.clientWidth, window.innerWidth) || -1,
@@ -15,6 +19,9 @@ export const getDetails = (element = {}) => {
   }
 }
 
+/**
+ * @return {Boolean} determines whether the current page is in focus
+ */
 export const isInFocus = () => {
   if (document.hidden !== 'undefined'){
     if (document.hidden === true){
@@ -33,6 +40,9 @@ export const isInFocus = () => {
   return true;
 }
 
+/**
+ * @return {String} returns the current iFrame serving context. It's either 'on page', 'same domain iframe', or 'cross domain iframe'
+ */
 export const iFrameContext = () => {
   try {
     if(window.top === window) {
@@ -54,6 +64,10 @@ export const iFrameContext = () => {
   }
 }
 
+/**
+ * constants describing different types of iFrame contexts
+ * @type {Object}
+ */
 export const iFrameServingScenarios = {
   ON_PAGE: 'on page',
   SAME_DOMAIN_IFRAME: 'same domain iframe',

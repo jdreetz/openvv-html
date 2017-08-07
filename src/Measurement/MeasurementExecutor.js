@@ -71,8 +71,8 @@ export default class MeasurementExecutor {
   /**
    * Handle viewability tracking start
    * @public
-   * @param  {Function~viewableCallback} callback - is called when viewability starts tracking
-   * @return {MeasurmentExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @param  {viewableCallback} callback - is called when viewability starts tracking
+   * @return {MeasurmentExecutor} returns instance of MeasurementExecutor associated with this callback
    */
   onViewableStart(callback) {
     return this._addCallback(callback, Events.START);
@@ -81,8 +81,8 @@ export default class MeasurementExecutor {
   /**
    * Handle viewability tracking stop.
    * @public
-   * @param {Function~viewableCallback} callback - is called when viewability has previously started, but element is now out of view
-   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @param {viewableCallback} callback - is called when viewability has previously started, but element is now out of view
+   * @return {MeasurementExecutor} returns instance of MeasurementExecutor associated with this callback
    */
   onViewableStop(callback) {
     return this._addCallback(callback, Events.STOP);
@@ -91,8 +91,8 @@ export default class MeasurementExecutor {
   /**
    * Handle viewability change.
    * @public
-   * @param  {Function~viewableCallback} callback - called when the viewable percentage of the element has changed
-   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @param  {viewableCallback} callback - called when the viewable percentage of the element has changed
+   * @return {MeasurementExecutor} returns instance of MeasurementExecutor associated with this callback
    */
   onViewableChange(callback) {
     return this._addCallback(callback, Events.CHANGE);
@@ -101,8 +101,8 @@ export default class MeasurementExecutor {
   /**
    * Handle viewability complete.
    * @public
-   * @param  {Function~viewableCallback} callback - called when element has been in view for the duration specified in the measurement strategy config
-   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @param  {viewableCallback} callback - called when element has been in view for the duration specified in the measurement strategy config
+   * @return {MeasurementExecutor} returns instance of MeasurementExecutor associated with this callback
    */
   onViewableComplete(callback) {
     this._addCallback(callback, Events.COMPLETE);
@@ -116,8 +116,8 @@ export default class MeasurementExecutor {
   /**
    * Handle unmeasureable event
    * @public
-   * @param  {Function~viewableCallback} callback - called when no suitable measurement techniques are available from the techniques provided
-   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @param  {viewableCallback} callback - called when no suitable measurement techniques are available from the techniques provided
+   * @return {MeasurementExecutor} returns instance of MeasurementExecutor associated with this callback
    */
   onUnmeasureable(callback) {
     this._addCallback(callback, Events.UNMEASUREABLE);
@@ -129,9 +129,9 @@ export default class MeasurementExecutor {
   }
 
    /**
-   * @callback Function~viewableCallback
+   * @callback viewableCallback
    * @param {Object} details - environment and measurement details of viewable event
-   * @return {MeasurmentExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @return {MeasurmentExecutor} returns instance of MeasurementExecutor associated with this callback
    */
 
   /**
@@ -145,7 +145,7 @@ export default class MeasurementExecutor {
    * Instantiates and filters list of available measurement technqiues to the first unmeasureable technique
    * @private
    * @param  {Array} - list of techniques available to measure viewability with
-   * @return {BaseTechnique} - selected technique
+   * @return {BaseTechnique} selected technique
    */
   _selectTechnique(techniques) {
     return techniques
@@ -158,7 +158,7 @@ export default class MeasurementExecutor {
    * creates instance of technique
    * @private
    * @param  {Function} - technique constructor
-   * @return {BaseTechnique} - instance of technique provided
+   * @return {BaseTechnique} instance of technique provided
    */
   _instantiateTechnique(technique) {
     return new technique(element, this._strategy.criteria);
@@ -234,7 +234,7 @@ export default class MeasurementExecutor {
    * publishes events to available listeners
    * @private
    * @param  {String} - event name
-   * @param  {*} - value to call callback with
+   * @param  {} - value to call callback with
    */
   _publish(event, value) {
     if(Array.isArray(this._listeners[event])) {
@@ -256,7 +256,7 @@ export default class MeasurementExecutor {
    * @private
    * @param {Function} - callback function to associate with event
    * @param {String} event - event to associate callback function with
-   * @return {MeasurementExecutor} - returns instance of MeasurementExecutor associated with this callback
+   * @return {MeasurementExecutor} returns instance of MeasurementExecutor associated with this callback
    */
   _addCallback(callback, event) {
     if(this._listeners[event] && typeof callback === 'function') {
@@ -273,7 +273,7 @@ export default class MeasurementExecutor {
    * Combines environment details with measurement technique details
    * @private
    * @param  {BaseTechnique} - technique to get measurement details from 
-   * @return {Object} - Environment details and measurement details combined
+   * @return {Object} Environment details and measurement details combined
    */
   _appendEnvironment(technique) {
     return Object.assign(

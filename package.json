@@ -2,7 +2,7 @@
   "name": "openvv-html",
   "version": "1.0.0",
   "description": "OpenVV project to provide viewability data and API to HTML5 based video",
-  "main": "dist/index.js",
+  "main": "dist/openvv.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

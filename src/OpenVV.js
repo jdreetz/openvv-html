@@ -20,7 +20,7 @@ export default class OpenVV {
    * @param  {HTMLElement} element - the element you'd like measure viewability on
    * @param  {Object} strategy - an object representing the strategy to use for measurement. 
    * See OpenVV.Strategies for StrategyFactory and DEFAULT_STRATEGY for more information. 
-   * @return {MeasurementExecutor} - returns instance of MeasurmentExecutor. 
+   * @return {MeasurementExecutor} returns instance of MeasurmentExecutor. 
    * This instance exposes event listeners onViewableStart, onViewableStop, onViewableChange, onViewableComplete, and onUnmeasureable
    * Also exposes start and dispose
    */
@@ -32,7 +32,6 @@ export default class OpenVV {
 
   /**
    * destroys all measurement executors
-   * @return {undefined}
    */
   dispose() {
     this.executors.forEach( e => e.dispose() );
